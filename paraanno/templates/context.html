@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous">
+    <title>rew-para-anno</title>
+
+    <style>
+      span.matched {color:darkgrey};
+    </style>
+    
+  </head>
+  <body>
+
+
+    <div class="container">
+
+      <ol class="breadcrumb">
+	<li class="breadcrumb-item"><a href="{{app_root}}/">home</a></li>
+	  <li class="breadcrumb-item"><a href="{{app_root}}/ann/{{user}}">{{user}}</a></li>
+	  <li class="breadcrumb-item"><a href="{{app_root}}/ann/{{user}}/{{batchfile}}">{{batchfile}}</a></li>
+	  <li class="breadcrumb-item active"><a href="{{app_root}}/ann/{{user}}/{{batchfile}}/{{pairseq}}">{{pairseq}}</a></li>
+	</ol>
+
+      
+      <div class="row">
+	<div class="col-1 p-1">{% if pairseq > 0 %}<a type="button" class="btn btn-lg btn-info" id="prevdoc" href="{{app_root}}/ann/{{user}}/{{batchfile}}/{{pairseq-1}}/context"><span class="fa fa-chevron-left"/></a>&nbsp;{% endif %}</div>
+	<div class="col-1 p-1">{% if not is_last %}<a tabindex="50" type="button" class="btn btn-lg btn-info" id="nextdoc" href="{{app_root}}/ann/{{user}}/{{batchfile}}/{{pairseq+1}}/context"><span class="fa fa-chevron-right"/></a>&nbsp;{% endif %}</div>
+	
+	
+	<div class="col-1"></div>
+
+	<!-- <div class="col-4 p-1"> -->
+	<!--   {% if pairseq > 0 %}<a type="button" class="btn btn-sm btn-dark" id="prevdoc" href="{{app_root}}/ann/{{user}}/{{batchfile}}/{{pairseq-1}}"><span class="fa fa-chevron-left"/></a>&nbsp;{% endif %} -->
+	<!--   {% if not is_last %}<a type="button" class="btn btn-sm btn-dark" id="nextdoc" href="{{app_root}}/ann/{{user}}/{{batchfile}}/{{pairseq+1}}"><span class="fa fa-chevron-right"/></a>&nbsp;{% endif %} -->
+	<!--   <button type="button" class="btn btn-sm btn-dark" id="save">Save</button> -->
+	<!-- </div> -->
+	<div class="col-6 p-1">
+	  Hide: short&nbsp;<input type="range" class="custom-range" val="{{mlenv}}" id="matchlencutoff" min="{{min_mlen}}" max="{{max_mlen}}" step="1">&nbsp;long
+	</div>
+      </div>
+      
+     <div class="row">
+	<div class="col-6 p-3 border" style="height:50vh;max-height:50vh;overflow-y:scroll;" id="text-left">
+	  {%- for txt, spanclass in left_spandata -%}
+	  {%- set lines=txt.split("\n") -%}
+	  {%- set currentspan=loop.index -%}
+	  <span class="matchspan" id="lspan{{loop.index}}" mlen="{{spanclass}}">
+	    {%- for l in lines -%}
+	    <span id="lspan-{{currentspan}}-{{loop.index}}">{{l|safe}}</span>{% if not loop.last %}<br/><br/>{% endif %}
+	    {%- endfor -%}
+	  </span>
+	  {%- endfor -%}
+
+	  <!-- {% for txt, spanclass in left_spandata %}<span class="matchspan" id="lspan{{loop.index}}" mlen="{{spanclass}}">{{txt | replace('\n', '<br/><br/>')|safe}}</span>{% endfor %} -->
+	</div>
+	
+	<div class="col-6 p-3 border" style="height:50vh;max-height:50vh;overflow-y:scroll;" id="text-right">
+	  {%- for txt, spanclass in right_spandata -%}
+	  {%- set lines=txt.split("\n") -%}
+	  {%- set currentspan=loop.index -%}
+	  <span class="matchspan" id="rspan{{loop.index}}" mlen="{{spanclass}}">
+	    {%- for l in lines -%}
+	    <span id="rspan-{{currentspan}}-{{loop.index}}">{{l|safe}}</span>{% if not loop.last %}<br/><br/>{% endif %}
+	    {%- endfor -%}
+	  </span>
+	  {%- endfor -%}
+	</div>
+
+      </div> <!-- row-->
+      
+
+
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script>
+
+      var docpairpath_glob='{{user}}/{{batchfile}}/{{pairseq}}';
+      var selection_left_min = '{{selection_left_min}}';
+      var selection_left_max = '{{selection_left_max}}';
+      var selection_right_min = '{{selection_right_min}}';
+      var selection_right_max = '{{selection_right_max}}';
+
+      function dirty() {
+	  $("#prevdoc").addClass("disabled");
+	  $("#nextdoc").addClass("disabled");
+	  $("#save").css("background-color","");
+	  
+      }
+
+      function clean() {
+	  $("#prevdoc").removeClass("disabled");
+	  $("#nextdoc").removeClass("disabled");
+      }
+	  
+	  
+      function get_all_data() {
+	  var anns=[];
+	  $.each($(".oneann"), function (i,e) {
+	      elem_a=$(".anntext",$(this));
+	      elem_f=$(".focuspair",$(this));
+	      anns.push({"txt":elem_a.val(),"focusid_left":elem_f.attr("focusid-left"), "focusid_right":elem_f.attr("focusid-right")});
+	  }
+		);
+	  console.log(anns);
+	  return anns;
+      }
+
+      
+
+      function hide_match_cutoff(n) {
+	  $.each($(".matchspan"), function(i,e) {
+	      if (parseInt($(this).attr("mlen"))<n) {
+		  $(this).removeClass("matched");
+	      }
+	      else {
+		  $(this).addClass("matched");
+	      }
+	  });
+      }
+      
+      function make_new_pair() {
+	  elem=`
+<div class="row border oneann">
+<div class="col-1">
+<a href="#" class="killann"><span class="fa fa-trash-o" /></a><a href="#" class="focuspair" focusid-left="_" focusid-right="_" ><span class="fa fa-hand-pointer-o" /></a></div>
+<div class="col-11"><textarea class="anntext" style="width:100%;"></textarea></div>
+</div>`
+	  t1=$.trim($("#text-left-inp").val());
+	  t2=$.trim($("#text-right-inp").val());
+	  if (t1=="" || t2=="") return;
+	  e=$(elem).prependTo($("#annotations"));
+	  $(".anntext",$(e)).val(t1+"\n"+t2);
+	  $(".focuspair",$(e)).attr("focusid-left",$("#text-left-inp").attr("focusid"));
+	  $(".focuspair",$(e)).attr("focusid-right",$("#text-right-inp").attr("focusid"));
+	  
+	  $("#text-left-inp").val("");
+	  $("#text-right-inp").val("");
+	  dirty();
+      }
+
+
+      function focuspair() {
+	  //lid=$(this).attr("focusid-left");
+	  //rid=$(this).attr("focusid-right");
+	  //console.log(selection_left_min);
+	  //console.log(selection_left_max);
+	  //console.log(selection_right_min);
+	  //console.log(selection_right_max);
+	  document.getElementById(selection_left_min).scrollIntoView();
+	  document.getElementById(selection_left_min).style.color = "red";
+	  document.getElementById(selection_right_min).scrollIntoView();
+	  document.getElementById(selection_right_min).style.color = "red";
+      }
+	  
+      
+      function kill_ann() {
+	  $(this).parent().parent().remove();
+	  dirty();
+      }
+
+      function copy_sel() {
+	  var srcid="#"+$(this).attr("id");
+	  selection=window.getSelection();
+	  focusid=selection.anchorNode.parentElement.id;
+	  text = selection.toString().replace(/[\r\n]+/g," ");
+	  $(srcid+"-inp").val(text);//$(this).val());
+	  $(srcid+"-inp").attr("focusid",focusid);//store the focus here
+      }
+
+      $(document).ready(
+	  function() {
+	      $("#matchlencutoff").on("input",function(){
+		  hide_match_cutoff($(this).val());
+              });
+	      $("#matchlencutoff").trigger("input");
+	      //$("#addbutton").on("click",make_new_pair);
+	      //$("#save").on("click",save_data);
+	      //$("#text-left").on("mouseup",copy_sel);
+	      //$("#text-right").on("mouseup",copy_sel);
+	  }
+      );
+
+      //$(document).on("click",".killann", kill_ann);
+      //$(document).on("input",".editdirty",dirty);
+      $(document).on("load",focuspair());
+
+      </script>
+
+    
+  </body>
+</html>

@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous">
+    <title>rew-para-anno</title>
+
+    <style>
+      span.matched {color:darkgrey};
+    </style>
+    
+  </head>
+  <body>
+
+
+    <div class="container">
+
+      <div class="row">
+	<div class="col-8">
+	  <ol class="breadcrumb">
+	    <li class="breadcrumb-item"><a href="{{app_root}}/">home</a></li>
+	    <li class="breadcrumb-item"><a href="{{app_root}}/ann/{{mode}}">{{mode}}</a></li>
+        <li class="breadcrumb-item"><a href="{{app_root}}/ann/{{mode}}/{{criteria}}">{{criteria}}</a></li>
+	    <li class="breadcrumb-item">{{user}}</li>
+	    <li class="breadcrumb-item active">{{batchfile}} / {{pairseq}}</li>
+	    <li class="breadcrumb-item">{{name}}</li>
+	  </ol>
+	</div>
+	<div class="col-2"><span class="h4 breadcrumb text-info">{{user}}</span></div>
+	<div class="col-2"><a target="_blank" tabindex="50" type="button" class="btn btn-lg btn-info" id="context" href="{{app_root}}/ann/{{user}}/{{batchfile}}/{{pairseq}}/context">full context</a></div>
+      </div>
+      
+      <div class="row">
+	<div class="col-12 p-1 m-2 ">
+	  <button type="button" class="btn btn-sm" data-toggle="tooltip" data-placement="top" onclick='$("#txt1inp").val($(this).attr("title"));dirty();' title="{{text1}}">Orig</button>
+	  {% if annotation.get("txt1inp") %}
+	  <textarea tabindex="20" class="editdirty" style="width:100%;" id="txt1inp">{{annotation["txt1inp"]}}</textarea>
+	  {% else %}
+	  <textarea tabindex="20" class="editdirty" style="width:100%;" id="txt1inp">{{text1}}</textarea>
+	  {% endif %}
+	</div>
+	
+	<div class="col-12 p-1 m-2 mt-1 ">
+	  <button type="button" class="btn btn-sm" data-toggle="tooltip" data-placement="top" onclick='$("#txt2inp").val($(this).attr("title"));dirty();' title="{{text2}}">Orig</button>
+	  {% if annotation.get("txt2inp") %}
+	  <textarea tabindex="20" class="editdirty" style="width:100%;" id="txt2inp">{{annotation["txt2inp"]}}</textarea>
+	  {% else %}
+	  <textarea tabindex="20" class="editdirty" style="width:100%;" id="txt2inp">{{text2}}</textarea>
+	  {% endif %}
+	</div>
+      </div> <!-- row-->
+
+
+      <!-- {% for label,labeldesc in labels %} -->
+      <!-- <div class="row"> -->
+      <!-- 	<div class="col-12 p-1 ml-2 mt-3"> -->
+      <!-- 	  <input class="input autosave" type="radio" name="labelradio" id="labelradio" value="{{label}}" {% if label==annotation["label"] %}checked{% endif %}> {{labeldesc}} </input> -->
+      <!-- 	</div> -->
+      <!-- </div> -->
+      <!-- {% endfor %} -->
+
+     
+      <div class="row mt-4 mb-4">
+	<div class="col-1">
+	  <b>Label</b>
+	</div>
+	<div class="col-2">
+	  <textarea tabindex="10" class="autosave" style="width:100%;" id="label">{{annotation["label"]}}</textarea>
+	</div>
+	<div class="col-1">
+	
+	<button type="button" id="flagbutton" value="{{annotation.get('flagged', 'false')}}" class="btn btn-sm" data-toggle="tooltip" data-placement="top" onclick='flag();dirty()' title="{{annotation.get('flagcomment', '')}}">
+	<svg id="flagicon" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-flag-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd" d="M14.778.085A.5.5 0 0 1 15 .5V8a.5.5 0 0 1-.314.464L14.5 8l.186.464-.003.001-.006.003-.023.009a12.435 12.435 0 0 1-.397.15c-.264.095-.631.223-1.047.35-.816.252-1.879.523-2.71.523-.847 0-1.548-.28-2.158-.525l-.028-.01C7.68 8.71 7.14 8.5 6.5 8.5c-.7 0-1.638.23-2.437.477A19.626 19.626 0 0 0 3 9.342V15.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 1 0v.282c.226-.079.496-.17.79-.26C4.606.272 5.67 0 6.5 0c.84 0 1.524.277 2.121.519l.043.018C9.286.788 9.828 1 10.5 1c.7 0 1.638-.23 2.437-.477a19.587 19.587 0 0 0 1.349-.476l.019-.007.004-.002h.001"/>
+</svg> </button>
+	
+	</div>
+
+	<div class="col-4">
+	  <ul style="list-style-type:none;">
+	    {% for l,d in (("4","Paraphrase"),("4<","Upper is more general"),("4>","Lower is more general"),("3","Paraphrase here but not in general"),("2","Related but not paraphrase"),("1","Unrelated"),("x","Skip")) %}
+	      <li> <span class="badge badge-success">{{l}}</span> : {{d}} </li>
+	    {% endfor %}
+	  </ul>
+	</div>
+
+	<div class="col-4">
+	  <ul style="list-style-type:none;">
+	    {% for l,d in (("s","Style (tone or register)"),("i","Diff in number, person, etc")) %}
+	      <li> <span class="badge badge-success">{{l}}</span> : {{d}} </li>
+	    {% endfor %}
+	  </ul>
+	</div>
+	
+      </div> <!-- Row -->
+      
+      <div class="row mt-3 mb-1">
+	<div class="col-3">
+	  <button tabindex="60" type="button" id="copyandrewbtn" class="btn btn-lg btn-info">Copy to rewrite</button>
+	</div>
+
+	<div class="col-3">
+	  <button type="button" id="wipebtn" class="btn btn-lg btn-info">Wipe</button>
+	</div>
+
+      </div>
+
+      
+      <div class="row">
+	<div class="col-12 p-1 m-2" style="">
+	  <textarea class="editdirty" style="width:100%;"  id="text-rew-left">{% if "rew1" in annotation %}{{annotation["rew1"]}}{% endif %}</textarea>
+	</div>
+	
+	<div class="col-12 p-1 m-2" style="">
+	  <textarea class="editdirty" style="width:100%;"  id="text-rew-right">{% if "rew2" in annotation %}{{annotation["rew2"]}}{% endif %}</textarea>
+	</div>
+
+      </div> <!-- row-->
+
+
+      
+     <div class="row">
+	<div class="col-1 p-1">
+	  {% if not is_first %}<a type="button" class="btn btn-lg btn-info" id="prevdoc" href="{{app_root}}/ann/{{mode}}/{{criteria}}/{{prev_example[0]}}/{{prev_example[1]}}/{{prev_example[2]}}"><span class="fa fa-chevron-left"/></a>&nbsp;{% endif %}
+	</div>
+	<div class="col-1 p-1">
+	  {% if not is_last %}<a tabindex="50" type="button" class="btn btn-lg btn-info" id="nextdoc" href="{{app_root}}/ann/{{mode}}/{{criteria}}/{{next_example[0]}}/{{next_example[1]}}/{{next_example[2]}}"><span class="fa fa-chevron-right"/></a>&nbsp;{% endif %}
+	</div>
+	<div class="col-1 p-1">
+	  <button type="button" class="btn btn-lg btn-info" id="save">Save</button>
+	</div>
+	<div class="col-1 p-1">
+	  <button type="button" class="btn btn-lg btn-outline-success" id="clean_ok">  OK  </button>
+	</div>
+	<div class="col-1 p-1">
+	  <button type="button" class="btn btn-lg btn-outline-warning" id="clean_warn">Warn</button>
+	</div>
+	<div class="col-1$ p-1">
+	  <span>Status: </span><span class="badge badge-light" id="clean_status_field">{{annotation.get('clean_status', '')}}</span>
+	  </div>
+      </div>
+
+	  <!-- here go the annotations! -->
+	  
+	</div> <!-- container -->
+      </div> <!-- row-->
+     </div>
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script>
+
+      var docpairpath_glob='{{user}}/{{batchfile}}/{{pairseq}}';
+      var username_glob='{{user}}';
+
+      function dirty() {
+	  $("#prevdoc").addClass("disabled");
+	  $("#nextdoc").addClass("disabled");
+	  $("#save").css("background-color","");
+	  
+      }
+
+      function wipe_rew() {
+	  $("#text-rew-left").val("");
+	  $("#text-rew-right").val("");
+	  dirty();
+      }
+
+      function clean() {
+	  $("#prevdoc").removeClass("disabled");
+	  $("#nextdoc").removeClass("disabled");
+      }
+	  
+      function copy_to_rewrite() {
+	  var t1=$("#txt1inp").val();
+	  var t2=$("#txt2inp").val();
+	  $("#text-rew-left").val(t1);
+	  $("#text-rew-right").val(t2)
+	  dirty();
+      }
+
+      function get_all_data() {
+	  var anns={};
+	  anns["label"]=$("#label").val();
+	  anns["rew1"]=$("#text-rew-left").val();
+	  anns["rew2"]=$("#text-rew-right").val();
+	  anns["txt1inp"]=$("#txt1inp").val();
+	  anns["txt2inp"]=$("#txt2inp").val();
+	  anns["user"]=username_glob;
+	  anns["flagged"]=$("#flagbutton").val();
+	  anns["clean_status"]=$("#clean_status_field").text();
+      anns["flagcomment"]=$("#flagbutton").prop('title');
+	  return anns;
+      }
+
+      function save_data() {
+      // remove flag comment if flag is false before saving
+      if ($('#flagbutton').attr('value') == "false") {
+          $('#flagbutton').prop("title", "");
+      }
+	  var all_data=get_all_data();
+	  var docpairpath = docpairpath_glob;
+	  $.ajax({type: 'POST',
+		  url: "{{app_root}}/saveann/"+docpairpath,
+		  data: JSON.stringify(all_data),
+		  contentType: 'application/json',
+		  error: function () { $("#save").css("background-color","red"); },
+		  success: function () { $("#save").css("background-color","green"); clean(); }
+		 }
+	  );
+      }
+
+      function printmoi() {
+	  alert('Moi')
+      }
+
+      function clean_ok() {
+	  $('#clean_status_field').text('OK');
+	  $("#clean_status_field").css("background-color","LightGreen");
+	  $("#clean_warn").css("background-color","white");
+	  $("#clean_ok").css("background-color","LightGreen");
+	  dirty();
+	  save_data();
+      }
+      
+      function clean_warn() {
+	  $('#clean_status_field').text('ERROR');
+	  $("#clean_status_field").css("background-color","Yellow");
+	  $("#clean_ok").css("background-color","white");
+	  $("#clean_warn").css("background-color","Yellow");
+	  dirty();
+	  save_data();
+      }
+
+      $('textarea').focus(function (e) {
+      var minrows = 2;
+      var maxrows = 6;
+      var rows = $(this).val().split("\n").length;
+      if (rows < minrows) { rows = minrows; }
+      if (rows > maxrows) { rows = maxrows; }
+      $(this).prop('rows', rows);
+      });
+      
+      function flag() {
+      if ($('#flagbutton').attr('value') == "false") {
+        $('#flagicon').css('fill', 'red');
+        $('#flagbutton').val('true');
+        var comment = $('#flagbutton').prop("title");
+        comment = prompt("Add comment:", comment);
+        $('#flagbutton').prop("title", comment);
+      } else {
+        $('#flagicon').css('fill', 'currentColor');
+        $('#flagbutton').val('false');
+      }
+      }
+
+      function load_flag() {
+      if ($('#flagbutton').attr('value') == "true") {
+          $('#flagicon').css('fill', 'red');
+      }
+      }
+      
+      function load_clean_status() {
+      if ($('#clean_status_field').text() == "OK") {
+          $("#clean_status_field").css("background-color","LightGreen");
+      }
+      if ($('#clean_status_field').text() == "ERROR") {
+          $("#clean_status_field").css("background-color","Yellow");
+      }
+      }
+      
+      $(document).ready(
+	  function() {
+	      $("#save").on("click",save_data);
+	      $("#copyandrewbtn").on("click",copy_to_rewrite);
+	      $("#wipebtn").on("click",wipe_rew);
+	      $("#clean_ok").on("click",clean_ok);
+	      $("#clean_warn").on("click",clean_warn);
+	      $("#label").focus();
+	  }
+      );
+
+
+      $(document).on("input",".editdirty",dirty);
+      $(document).on("input",".autosave",save_data);
+      $(document).on("load", load_flag());
+      $(document).on("load", load_clean_status());
+
+      var keys = {};
+
+      $(document).keydown(function(event) {
+	  keys[event.which] = true;
+	  //<div id="log"></div>
+	  //$( "#log" ).html( event.type + ": " +  event.which );
+	  //$( "#log" ).html( Object.keys(keys).length );
+	  if (keys[17] && keys[16] && keys[49]) { // Ctrl + Shift + 1
+	      copy_to_rewrite();
+	      delete keys[17];
+	      delete keys[16];
+	      delete keys[49];
+	  }
+	  else if (keys[17] && keys[16] && keys[51]) { // Ctrl + Shift + 3
+	      wipe_rew();
+	      delete keys[17];
+	      delete keys[16];
+	      delete keys[51];
+	  }
+	  else if (keys[17] && keys[16] && keys[52]) { // Ctrl + Shift + 4
+	      save_data();
+	      delete keys[17];
+	      delete keys[16];
+	      delete keys[52];
+	  }
+	      
+      });
+
+      $(document).keyup(function(event) {
+	  delete keys[event.which];
+      });
+
+      </script>
+
+    
+  </body>
+</html>

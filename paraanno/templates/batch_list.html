@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>Batch list / {{user}}</title>
+  </head>
+  <body>
+
+    <div class="container">
+    <div class="row">
+	<div class="col-9">
+      <ol class="breadcrumb">
+      	<li class="breadcrumb-item"><a href="{{app_root}}/">home</a></li>
+        <li class="breadcrumb-item"><a href="{{app_root}}/ann/{{user}}">{{user}}</a></li>
+      </ol>
+       </div>
+    
+
+    <h3>Overall statistics: {{stats[0]}} completed, {{stats[1]}} skipped, {{stats[2]}} left, total: {{stats[3]}}</h3>
+    <div class="progress">
+      <div class="progress-bar progress-bar-striped bg-success" style="width:{{100*stats[0]/stats[3]}}%">
+	{{stats[0]}}
+      </div>
+      <div class="progress-bar progress-bar-striped bg-warning" style="width:{{100*stats[1]/stats[3]}}%">
+	{{stats[1]}}
+      </div>
+      <div class="progress-bar progress-bar-striped bg-danger" style="width:{{100*stats[2]/stats[3]}}%">
+	{{stats[2]}}
+      </div>
+    </div>
+    <br>
+        <div class="container">
+        {% for label,len,(done,skipped,left),timestamp in batches %}
+	<div class="row">
+	  <div class="col-4">
+	    <a href="{{app_root}}/ann/{{user}}/{{label}}">  {{label}} </a>
+	  </div>
+	  <div class="col-2">
+	    {{timestamp.split(".")[0].replace("T"," ")}}
+	  </div>
+
+	  <div class="col-3">
+	    {{done}} OK {{skipped}} ERROR / {{len}}<!-- {{left}} left  -->
+	  </div>
+	  <div class="col-3">
+	    <div class="progress">
+              <div class="progress-bar bg-success" role="progressbar"
+		   aria-valuenow="{{percentage}}" aria-valuemin="0" aria-valuemax="100" style="width:{{100*done/len}}%">
+	      </div>
+              <div class="progress-bar bg-danger" role="progressbar"
+		   aria-valuenow="{{100*skipped/len}}" aria-valuemin="0" aria-valuemax="100" style="width:{{100*skipped/len}}%">
+	      </div>
+              <div class="progress-bar bg-light" role="progressbar"
+		   aria-valuenow="{{100*left/len}}" aria-valuemin="0" aria-valuemax="100" style="width:{{100*left/len}}%">
+	      </div>
+	    </div>
+	  </div>
+	</div> <!-- row -->
+        {% endfor %}
+	</div> <!-- container -->
+    </div>
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  </body>
+</html>
