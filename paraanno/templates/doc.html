@@ -80,6 +80,10 @@
 </svg> </button>
 	
 	</div>
+	
+	<div class="col-1 p-1">
+	  <span>Status: </span><span class="badge badge-light" id="clean_status_field">{{annotation.get('clean_status', '')}}</span>
+	  </div>
 
 	<div class="col-4">
 	  <ul style="list-style-type:none;">
@@ -89,7 +93,7 @@
 	  </ul>
 	</div>
 
-	<div class="col-4">
+	<div class="col-3">
 	  <ul style="list-style-type:none;">
 	    {% for l,d in (("s","Style (tone or register)"),("i","Diff in number, person, etc")) %}
 	      <li> <span class="badge badge-success">{{l}}</span> : {{d}} </li>
@@ -137,12 +141,9 @@
 	<div class="col-1 p-1">
 	  <button type="button" class="btn btn-lg btn-outline-success" id="clean_ok">  OK  </button>
 	</div>
-	<div class="col-1 p-1">
+	<div class="col-1$ p-1">
 	  <button type="button" class="btn btn-lg btn-outline-warning" id="clean_warn">Warn</button>
 	</div>
-	<div class="col-1$ p-1">
-	  <span>Status: </span><span class="badge badge-light" id="clean_status_field">{{annotation.get('clean_status', '')}}</span>
-	  </div>
       </div>
 
 	  <!-- here go the annotations! -->
